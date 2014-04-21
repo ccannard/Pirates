@@ -34,7 +34,7 @@ public class MenuActivity extends Activity{
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Toast.makeText(getApplicationContext(), "play", Toast.LENGTH_SHORT).show();
-				Intent play = new Intent(getApplication(), GameArea.class);
+				Intent play = new Intent(getApplication(), MainActivity.class);
 				play.putExtras(saveParam(savedInstanceState));
 				startActivity(play);
 			}
