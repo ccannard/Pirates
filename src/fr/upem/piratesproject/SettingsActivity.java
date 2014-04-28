@@ -13,10 +13,59 @@ import android.widget.RadioButton;
 public class SettingsActivity extends Activity {
 
 	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Bundle extras = getIntent().getExtras();
+		/*if(extras==null){
+			Log.d("PiratesMadness","savedInstanceState : is null");
+		}else{
+			for(String k : extras.keySet()){
+				Log.d("PiratesMadness","Key : "+k);
+			}
+		}*/
+
 		setContentView(R.layout.activity_settings);
-		setButtonOnListener(savedInstanceState);
+
+
+
+		/* managment of buttons */
+		EditText edit1 = (EditText)findViewById(R.id.name_player1);
+		String tmpString = new String();
+		if(extras!=null && !extras.isEmpty()){
+			if(extras.getString("namePlayerOne")!=null){
+				edit1.setText(extras.getString("namePlayerOne"));
+			}
+
+			EditText edit2 = (EditText)findViewById(R.id.name_player2);
+			if(extras.getString("namePlayerTwo")!=null){
+				edit2.setText(extras.getString("namePlayerTwo"));
+			}
+
+			RadioButton modeEasy = (RadioButton) findViewById(R.id.easy_mode);
+			RadioButton modeHard = (RadioButton) findViewById(R.id.hard_mode);
+			if((tmpString=extras.getString("mode"))!=null && tmpString.compareToIgnoreCase("hard")==0){
+				modeEasy.setChecked(false);
+				modeHard.setChecked(true);
+			}else{
+				modeEasy.setChecked(true);
+				modeHard.setChecked(false);
+			}
+
+			RadioButton soundOn = (RadioButton) findViewById(R.id.button_sound_on);
+			RadioButton soundOff = (RadioButton) findViewById(R.id.button_sound_off);
+			Log.d("PiratesMadness","sound state settings : "+extras.getBoolean("sound"));
+			if(extras.containsKey("sound") && extras.getBoolean("sound")==false){
+				soundOn.setChecked(false);
+				soundOff.setChecked(true);
+			}else{
+				soundOn.setChecked(true);
+				soundOff.setChecked(false);
+			}
+		}
+		setButtonOnListener(extras);
+
+
 
 	}
 
@@ -50,7 +99,7 @@ public class SettingsActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent play = new Intent(getApplication(), GameArea.class);
+				Intent play = new Intent(getApplication(), MainActivity.class);
 				play.putExtras(saveParam(savedInstanceState));
 				startActivity(play);
 			}
@@ -84,7 +133,7 @@ public class SettingsActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		//Comment récupérer les données de l'application à ce niveau la ?
-		setButtonOnListener(null);
+		//		setButtonOnListener(null);		
 	}
 
 	public Bundle saveParam(Bundle data){
@@ -94,13 +143,21 @@ public class SettingsActivity extends Activity {
 		EditText edit1 = (EditText)findViewById(R.id.name_player1);
 		String text = edit1.getText().toString();
 		//tester si le text vaut null lorsque l'utilisateur ne renseigne rien
-		Log.d("PiratesMadness - SettingsActivity", "text vaut : "+text);
+		if(text.length()==0){
+			text = new String("Player1");
+		}
+		Log.d("PiratesMadness - SettingsActivity", "text player1 vaut : "+text);
 		data.putString("namePlayerOne", text);
+
 		EditText edit2 = (EditText)findViewById(R.id.name_player2);
 		String text2 = edit2.getText().toString();
 		//tester si le text vaut null lorsque l'utilisateur ne renseigne rien
-		Log.d("PiratesMadness - SettingsActivity", "text vaut : "+text2);
+		if(text2.length()==0){
+			text2 = new String("Player2");
+		}
+		Log.d("PiratesMadness - SettingsActivity", "text player2 vaut : "+text2);
 		data.putString("namePlayerTwo", text2);
+
 		RadioButton modeEasy = (RadioButton) findViewById(R.id.easy_mode);
 		String textMode=null;
 		if(modeEasy.isChecked()){
@@ -108,12 +165,15 @@ public class SettingsActivity extends Activity {
 		}else{
 			textMode = "hard";
 		}
+		Log.d("PiratesMadness","mode : "+((modeEasy.isChecked()==true)?"easy":"hard"));
 		data.putString("mode", textMode);
+
 		RadioButton soundOn = (RadioButton) findViewById(R.id.button_sound_on);
 		boolean sound=false;
 		if(soundOn.isChecked()){
 			sound=true;
 		}
+		Log.d("PiratesMadness","sound : "+sound);
 		data.putBoolean("sound", sound);
 		return data;
 	}
