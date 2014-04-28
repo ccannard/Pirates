@@ -6,26 +6,31 @@ import android.graphics.Rect;
 import android.util.Log;
 
 public class Pirates {
-	private int live;
-	private Point coordinate;
-	private float speed;
-	private final GameArea ga;
-	private final int id;
-	private final Bitmap face;
+	int live;
+	Point coordinate;
+	float speed;
+	final GameArea ga;
+	final int id;
+	final Bitmap face;
+	final Rect padBuffer;
+	boolean noOrientation;
+	Orientation orientation;
 	
 	public Pirates(Point initialCoordinate, GameArea ga, int id, Bitmap face) {
 		this.face = face;
 		this.ga = ga;
 		coordinate = initialCoordinate;
 		this.id = id;
-	}
-	
-	public Point getCoodinate(){
-		return this.coordinate;
-	}
-	
-	public Bitmap getPirateBitmap(){
-		return this.face;
+		final int middleX;
+		final int middleY;
+		if(ga.getWidth()<ga.getHeight()){
+			middleX = ga.getWidth();
+			middleY = ga.getHeight()/2;
+		}else{
+			middleX = ga.getWidth()/2;
+			middleY = ga.getHeight();
+		}
+		this.padBuffer = new Rect(0, 0, middleX, middleY);
 	}
 	
 	public void jump(){
@@ -33,21 +38,45 @@ public class Pirates {
 	}
 	
 	public Rect getPiratePadBuffer(){
-		Rect area;
-		if(ga.getBattleGround().isEasy()){
-			final int middleX;
-			final int middleY;
-			if(ga.getWidth()<ga.getHeight()){
-				middleX = ga.getWidth();
-				middleY = ga.getHeight()/2;
-			}else{
-				middleX = ga.getWidth()/2;
-				middleY = ga.getHeight();
-			}
-			area = new Rect(0, 0, middleX, middleY);
+		if(ga.bg.easy){
+			return this.padBuffer;
 		} else {
-			area = new Rect(coordinate.x+50, coordinate.y-50, coordinate.x-50, coordinate.y+50);
+			return new Rect(coordinate.x+50, coordinate.y-50, coordinate.x-50, coordinate.y+50);
 		}
+	}
+
+	public Rect getPirateBuffer() {
+		Rect area = new Rect(coordinate.x+(face.getWidth()/2),coordinate.y-(face.getHeight()/2), coordinate.x-(face.getWidth()/2), coordinate.y+(face.getHeight()/2));
+		
 		return area;
+	}
+
+	public void reverse() {
+		Orientation newOne;
+		switch(orientation){
+			case NORTH : newOne = Orientation.SOUTH; break;
+			case SOUTH : newOne = Orientation.NORTH; break;
+			case EAST : newOne = Orientation.WEST; break;
+			default : newOne = Orientation.EAST; break;
+		}
+		this.orientation = newOne;
+	}
+
+	public void changeOrientation(Rect rect) {
+		float xDelta = coordinate.x-rect.exactCenterX();
+		float yDelta = coordinate.y-rect.exactCenterY();
+		if(xDelta>=0.5 && xDelta<=-0.5){
+			if(yDelta<=-1 && yDelta>=-2){
+				orientation = Orientation.NORTH;
+			} else {
+				orientation = Orientation.SOUTH;
+			}
+		}else{
+			if(xDelta<=-1 && xDelta>=-2){
+				orientation = Orientation.EAST;
+			} else {
+				orientation = Orientation.WEST;
+			}
+		}
 	}
 }

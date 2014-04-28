@@ -8,29 +8,28 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.SurfaceHolder;
 
 
 public class BattleGround {
 
-	private int height = 0;
-	private int width = 0;
-	private Bitmap texture;
-	private SparseArray<ArrayList<Integer>> map;
-	private boolean landscape;
-	private Pirates[] pirates;
-	private boolean easy = true;
+	int height = 0;
+	int width = 0;
+	Bitmap texture;
+	SparseArray<ArrayList<Integer>> map;
+	boolean landscape;
+	Pirates[] pirates;
+	boolean easy = true;
+	ArrayList<Rect> obstacles;
 
 	public static BattleGround createBattleground(InputStream level, Activity daddy, boolean isEasy, int DrawablePirate1, int DrawablePirate2){
 		try {
 			BattleGround bg = new BattleGround();
+			bg.obstacles = new ArrayList<Rect>();
 			bg.easy = isEasy;
 			int height = 0;
 			SparseArray<ArrayList<Integer>> map = new SparseArray<ArrayList<Integer>>();
@@ -99,33 +98,4 @@ public class BattleGround {
 		return Bitmap.createBitmap(basic, 0, 0, basic.getWidth(),
 				basic.getHeight(), matrix, true);
 	}
-	
-	public Pirates getPirate(int id) {
-		return this.pirates[id];
-	}
-
-	public boolean isEasy() {
-		return easy;
-	}
-
-	public Bitmap getTexture() {
-		return texture;
-	}
-
-	public SparseArray<ArrayList<Integer>> getMap() {
-		return map;
-	}
-
-	public boolean isLandscape() {
-		return landscape;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
 }

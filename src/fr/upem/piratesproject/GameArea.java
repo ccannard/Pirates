@@ -2,6 +2,8 @@ package fr.upem.piratesproject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 
 import android.app.Activity;
@@ -16,10 +18,10 @@ import android.view.View;
 
 public class GameArea extends SurfaceView implements Runnable {
 
-	private BattleGround bg = null;
-	private Thread mainThread = null;
-	private final SurfaceHolder sh;
-	private boolean active = false;
+	BattleGround bg = null;
+	Thread mainThread = null;
+	final SurfaceHolder sh;
+	boolean active = false;
 
 	public GameArea(Context context, AttributeSet as) {
 		super(context, as);
@@ -43,45 +45,76 @@ public class GameArea extends SurfaceView implements Runnable {
 			try {
 				canvas = sh.lockCanvas();
 				canvas.drawARGB(255, 255, 255, 255);
-				for (int i = 0; i < ((bg.isLandscape())?bg.getWidth():bg.getHeight()); i++) {
-					int size = bg.getMap().get(i, new ArrayList<Integer>()).size();
+				for (int i = 0; i < ((bg.landscape)?bg.width:bg.height); i++) {
+					int size = bg.map.get(i, new ArrayList<Integer>()).size();
 					for (int j = 0; j < size; j++) {
 						int y = i;
-						int x = bg.getMap().get(i).get(j);
-						canvas.drawBitmap(bg.getTexture(), x * bg.getTexture().getWidth(), y * bg.getTexture().getHeight(), null);
+						int x = bg.map.get(i).get(j);
+						canvas.drawBitmap(bg.texture, x * bg.texture.getWidth(), y * bg.texture.getHeight(), null);
 					}
 				}
 				for(int i = 0; i<2; i++){
-					Pirates pirate = bg.getPirate(i);
-					canvas.drawBitmap(pirate.getPirateBitmap(), (float)pirate.getCoodinate().x, (float)pirate.getCoodinate().y, null);
+					Pirates pirate = bg.pirates[i];
+					canvas.drawBitmap(pirate.face, (float)pirate.coordinate.x, (float)pirate.coordinate.y, null);
 				}
 			} finally {
 				sh.unlockCanvasAndPost(canvas);
 			}
 			if(true){
+				Observer impactObserver = new Observer() {
+					
+					@Override
+					public void update(Observable observable, Object data) {
+						BattleGround bg = (BattleGround)data;
+						if(bg.pirates[0].getPirateBuffer().intersect(bg.pirates[1].getPirateBuffer())){
+							//TODO action en cas de choc entre les deux joueurs
+						}
+						
+						//Rebond ou changement de gravité
+						if(bg.pirates[0].noOrientation || bg.pirates[1].noOrientation){
+							for(int i = 0; i<bg.obstacles.size();i++){
+								if(bg.obstacles.get(i).intersect(bg.pirates[0].getPirateBuffer())){
+									if(bg.pirates[0].noOrientation){
+										bg.pirates[0].changeOrientation(bg.obstacles.get(i));
+										bg.pirates[0].noOrientation = false;
+									}else{
+										bg.pirates[0].reverse();
+									}
+								}
+								if(bg.obstacles.get(i).intersect(bg.pirates[1].getPirateBuffer())){
+									if(bg.pirates[1].noOrientation){
+										bg.pirates[1].changeOrientation(bg.obstacles.get(i));
+										bg.pirates[1].noOrientation = false;
+									}else{
+										bg.pirates[1].reverse();
+									}
+								}
+							}
+						}
+						
+					}
+				};
+				impactObserver.update(null, this.bg);
 				OnTouchListener otl = new OnTouchListener() {
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 						int id = -1;
-						if(bg.getPirate(0).getPiratePadBuffer().contains((int)event.getX(), (int)event.getY())){
-							if(!bg.getPirate(1).getPiratePadBuffer().contains((int)event.getX(), (int)event.getY()))
+						if(bg.pirates[0].getPiratePadBuffer().contains((int)event.getX(), (int)event.getY())){
+							if(!bg.pirates[1].getPiratePadBuffer().contains((int)event.getX(), (int)event.getY()))
 								id = 1;
-						} else if(bg.getPirate(1).getPiratePadBuffer().contains((int)event.getX(), (int)event.getY())){
-							if(!bg.getPirate(0).getPiratePadBuffer().contains((int)event.getX(), (int)event.getY()))
+						} else if(bg.pirates[1].getPiratePadBuffer().contains((int)event.getX(), (int)event.getY())){
+							if(!bg.pirates[0].getPiratePadBuffer().contains((int)event.getX(), (int)event.getY()))
 								id = 2;
 						}
 						if(id!=-1)
-							bg.getPirate(id).jump();
+							bg.pirates[id].jump();
+							bg.pirates[id].noOrientation = true;
 						return true;
 					}
 				};
 				this.setOnTouchListener(otl);
 			}
 		}
-	}
-	
-	public BattleGround getBattleGround(){
-		return this.bg;
 	}
 
 	public void pause() {
