@@ -4,15 +4,19 @@
     android:layout_height="match_parent" 
     android:background="@drawable/drapeau_pirate">
     
-    <CheckBox android:id="@+id/main_menu_sound"
+    <ImageButton 
+        android:id="@+id/main_menu_sound"
 	    android:layout_alignParentTop="true"
 	    android:layout_alignParentRight="true"
 	    android:layout_width="45dp"
 	    android:layout_height="45dp"
-	    android:background="@drawable/sound_on"
-	    android:checked="true"/>
+	    android:src="@drawable/sound_on"
+	    android:clickable="true"
+	    android:layout_margin="10dp"
+	    android:contentDescription="@string/sound"
+	    android:background="@color/white"
+	    />
 	
-	    
 	<Button 
 	    android:id="@+id/main_menu_score_board"
 	    android:layout_width="180dp"
@@ -20,7 +24,7 @@
 	    android:text="@string/score_board"
 	    android:gravity="center"
 	    android:background="@drawable/button_standart_gimp"
-	    android:paddingBottom="20dp"
+	    android:layout_marginBottom="5dp"
 	    android:layout_centerInParent="true"
 	    android:alpha="0.8"
 	    android:textStyle="bold"/>
@@ -33,7 +37,7 @@
 	    android:background="@drawable/button_standart_gimp"
 	    android:layout_above="@id/main_menu_score_board"
 	    android:layout_centerInParent="true"
-	    android:paddingBottom="5dp"
+	    android:layout_marginBottom="5dp"
 	    android:alpha="0.8"
 	    android:textStyle="bold"/>
 		
@@ -46,7 +50,7 @@
 	    android:background="@drawable/button_standart_gimp"
 	    android:layout_above="@id/main_menu_settings"
 	    android:layout_centerInParent="true"
-	    android:paddingBottom="5dp"
+	    android:layout_marginBottom="5dp"
 	    android:alpha="0.8"
 	    android:textStyle="bold"/>
 

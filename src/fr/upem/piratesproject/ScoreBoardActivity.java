@@ -1,13 +1,19 @@
 package fr.upem.piratesproject;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class ScoreBoardActivity extends Activity{
@@ -18,46 +24,79 @@ public class ScoreBoardActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_score_board);
 //		Log.d("PiratesMadness","page : score board");
+		ListView lv = (ListView) findViewById(R.id.id_score_board);
+		lv.setAdapter(new ScoreBoardAdapter(
+				getApplicationContext(), R.layout.line_score_board, R.id.id_prototype_text_name_winner,
+				createListOfLineScoreBoard()));
+		Bundle extras = getIntent().getExtras();
+		setButtonOnListener(extras);
 	}
+	
+	private LineScoreBoard[] createListOfLineScoreBoard(){
+		LineScoreBoard[] listLineScoreBoard=null;
+		Scanner scan=null;
+		try {
+			scan = new Scanner(getAssets().open("score"));
+			if(!scan.hasNext()) {
+				Log.e("PiratesMadness - ScoreBoardActivity - createListOfLineScoreBoard", "Error with the scanner");
+				System.exit(-1);
+			}
+//			int size = Integer.parseInt(scan.nextLine());
+			LinkedList<LineScoreBoard> list = new LinkedList<LineScoreBoard>();
+			while(scan.hasNextLine()){
+				String[] tmp = scan.nextLine().split(" ");
+				list.addLast(new LineScoreBoard(tmp[0], tmp[1], tmp[2], tmp[3]));
+			}
 
-	@Override
-	protected void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.id_score_board);
-		int width = 100;
-		int height = 30;
-		TextView firstLine = new TextView(getApplicationContext());
-		firstLine.setText("Score Board :");
-		firstLine.setGravity(Gravity.CENTER);
-		firstLine.setBackgroundColor(getResources().getColor(R.color.white));
-		linearLayout.addView(firstLine);
-		try{
-			Scanner scText = new Scanner(getApplicationContext().getAssets().open("score"));
-			int compteur=0;
-			while(scText!=null && scText.hasNextLine() && compteur<10){
-				LinearLayout linearLayout2 = new LinearLayout(getApplicationContext());
-				linearLayout2.setOrientation(LinearLayout.HORIZONTAL);
-				linearLayout2.setBackgroundColor(getResources().getColor(R.color.green));
-//				linearLayout2.setPadding(10, 10, 10, 10);
-				String tmp = scText.nextLine();
-				Log.d("PiratesMadness", "ligne : "+tmp);
-				String[] ressources = tmp.split(" ");
-				for(String tmpRess : ressources){
-					TextView textView = new TextView(getApplicationContext());
-					textView.setText(tmpRess);
-					textView.setTextColor(getResources().getColor(R.color.Black));
-					textView.setGravity(Gravity.CENTER);
-					textView.setPadding(10, 10, 10, 0);
-					linearLayout2.addView(textView);
-					
-				}
-				linearLayout.addView(linearLayout2);
+			int size = list.size();
+			listLineScoreBoard = new LineScoreBoard[size];
+			for(int i=0; i<size; i++){
+				listLineScoreBoard[i] = list.remove();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+			if(scan!=null){
+				scan.close();
 			}
 		}
-		catch (IOException ioe){
-			System.out.println("Error for reading the file");
-		}
-		setContentView(linearLayout);
+		return listLineScoreBoard;
 	}
+	
+	private void setButtonOnListener(final Bundle savedInstanceState){
+		Button bPlay = (Button) findViewById(R.id.button_play);
+		bPlay.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent play = new Intent(getApplication(), MainActivity.class);
+				if(savedInstanceState!=null) play.putExtras(savedInstanceState);
+				startActivity(play);
+			}
+		});
+		Button bMenu = (Button) findViewById(R.id.button_menu);
+		bMenu.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent menu = new Intent(getApplication(), MenuActivity.class);
+				if(savedInstanceState!=null) menu.putExtras(savedInstanceState);
+				startActivity(menu);
+			}
+		});
+		Button bSettings = (Button) findViewById(R.id.button_settings);
+		bSettings.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent settings = new Intent(getApplication(), SettingsActivity.class);
+				if(savedInstanceState!=null) settings.putExtras(savedInstanceState);
+				startActivity(settings);
+			}
+		});
+	}
+
 }
