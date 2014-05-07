@@ -6,13 +6,14 @@ import android.graphics.Rect;
 import android.util.Log;
 
 public class Pirates {
-	int live;
+	int life = 5;
 	Point coordinate;
 	float speed;
 	final GameArea ga;
 	final int id;
 	final Bitmap face;
 	final Rect padBuffer;
+	Orientation direction;
 	boolean noOrientation;
 	Orientation orientation;
 	
@@ -51,15 +52,13 @@ public class Pirates {
 		return area;
 	}
 
-	public void reverse() {
-		Orientation newOne;
-		switch(orientation){
-			case NORTH : newOne = Orientation.SOUTH; break;
-			case SOUTH : newOne = Orientation.NORTH; break;
-			case EAST : newOne = Orientation.WEST; break;
-			default : newOne = Orientation.EAST; break;
+	public void reverse(Orientation o) {
+		switch(o){
+			case NORTH : o = Orientation.SOUTH; break;
+			case SOUTH : o = Orientation.NORTH; break;
+			case EAST : o = Orientation.WEST; break;
+			default : o = Orientation.EAST; break;
 		}
-		this.orientation = newOne;
 	}
 
 	public void changeOrientation(Rect rect) {

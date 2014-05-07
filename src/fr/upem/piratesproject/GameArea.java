@@ -22,6 +22,7 @@ public class GameArea extends SurfaceView implements Runnable {
 	Thread mainThread = null;
 	final SurfaceHolder sh;
 	boolean active = false;
+	Observer impactObserver;
 
 	public GameArea(Context context, AttributeSet as) {
 		super(context, as);
@@ -61,13 +62,21 @@ public class GameArea extends SurfaceView implements Runnable {
 				sh.unlockCanvasAndPost(canvas);
 			}
 			if(true){
-				Observer impactObserver = new Observer() {
+				impactObserver = new Observer() {
 					
 					@Override
 					public void update(Observable observable, Object data) {
 						BattleGround bg = (BattleGround)data;
 						if(bg.pirates[0].getPirateBuffer().intersect(bg.pirates[1].getPirateBuffer())){
-							//TODO action en cas de choc entre les deux joueurs
+							if(bg.pirates[0].speed>bg.pirates[1].speed){
+								bg.pirates[1].life-=1;
+							}else if(bg.pirates[1].speed>bg.pirates[0].speed){
+								bg.pirates[0].life-=1;
+							}
+							bg.pirates[0].changeOrientation(bg.pirates[0].getPirateBuffer());
+							bg.pirates[0].reverse(bg.pirates[0].direction);
+							bg.pirates[1].changeOrientation(bg.pirates[1].getPirateBuffer());
+							bg.pirates[1].reverse(bg.pirates[1].direction);
 						}
 						
 						//Rebond ou changement de gravité
@@ -78,7 +87,7 @@ public class GameArea extends SurfaceView implements Runnable {
 										bg.pirates[0].changeOrientation(bg.obstacles.get(i));
 										bg.pirates[0].noOrientation = false;
 									}else{
-										bg.pirates[0].reverse();
+										bg.pirates[0].reverse(bg.pirates[0].direction);
 									}
 								}
 								if(bg.obstacles.get(i).intersect(bg.pirates[1].getPirateBuffer())){
@@ -86,7 +95,7 @@ public class GameArea extends SurfaceView implements Runnable {
 										bg.pirates[1].changeOrientation(bg.obstacles.get(i));
 										bg.pirates[1].noOrientation = false;
 									}else{
-										bg.pirates[1].reverse();
+										bg.pirates[1].reverse(bg.pirates[1].direction);
 									}
 								}
 							}
@@ -132,6 +141,7 @@ public class GameArea extends SurfaceView implements Runnable {
 
 	public void resume() {
 		active = true;
+		impactObserver.update(null, this);
 		mainThread = new Thread(this);
 		mainThread.start();
 	}
